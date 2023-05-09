@@ -1,0 +1,57 @@
+﻿@page "/userDetails"
+@inject NavigationManager NavigationManager
+@inject AuthManager authManager
+@inject IJSRuntime jsRuntime
+
+<h3>用户信息</h3>
+
+<div class="container my-5">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card">
+                <img src="@user.UserPhoto" class="card-img-top" alt="user-photo">
+                <div class="card-body">
+                    <h5 class="card-title">@user.Name</h5>
+                    <p class="card-text">@user.TeamName</p>
+                </div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item"><strong>ID：</strong> @user.Id</li>
+                    <li class="list-group-item"><strong>登录名：</strong> @user.LoginName</li>
+                    <li class="list-group-item"><strong>手机号：</strong> @user.PhoneNumber</li>
+                    <li class="list-group-item"><strong>公司：</strong> @user.CompanyName</li>
+                    <li class="list-group-item"><strong>团队：</strong> @user.TeamName</li>
+                    <li class="list-group-item"><strong>用户角色：</strong> @user.UserRole</li>
+                    <li class="list-group-item"><strong>公司 ID：</strong> @user.CompanyId</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private AuthManager.User user =new AuthManager.User();
+    protected override async Task OnInitializedAsync()
+    {
+        // 从 SessionStorage 中获取 token
+        var token = await jsRuntime.InvokeAsync<string>("sessionStorage.getItem", "token");
+
+        if (token != null)
+        {
+            var result = await authManager.SelectUserInfoAsync(token);
+            if (result.Code==0)
+            {
+                var successResult = (AuthManager.SelectUserInfoSucessResponse)result;
+                user = (AuthManager.User)successResult.Data;
+            }
+            else
+            {
+                // 处理获取 API 资源失败的情况
+            }
+        }
+        else
+        {
+            NavigationManager.NavigateTo("/login");
+        }
+    }
+
+}

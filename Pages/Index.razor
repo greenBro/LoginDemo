@@ -1,9 +1,21 @@
 ﻿@page "/"
+@inject NavigationManager NavigationManager
 
-<PageTitle>Index</PageTitle>
+<PageTitle>home</PageTitle>
 
-<h1>Hello, world!</h1>
+<div class="container text-center my-5">
+    <div class="row">
+        <div class="col-md-12">
+            <h1 class="display-4 mb-4">欢迎来到我们的网址!</h1>
+            <p class="lead mb-4">感谢你今天的浏览</p>
+            <button class="btn btn-primary btn-lg" @onclick="OnViewMoreClick">更多</button>
+        </div>
+    </div>
+</div>
 
-Welcome to your new app.
-
-<SurveyPrompt Title="How is Blazor working for you?" />
+@code {
+    private async Task OnViewMoreClick()
+    {
+            NavigationManager.NavigateTo("/userDetails");
+    }
+}

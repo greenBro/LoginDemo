@@ -1,0 +1,69 @@
+﻿@page "/login"
+@using System.ComponentModel.DataAnnotations
+@inject NavigationManager NavigationManager
+@inject AuthManager AuthManager
+@inject IJSRuntime jsRuntime
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-6 col-md-8 col-sm-10">
+            <div class="card mt-5">
+                <div class="card-body">
+                    <h5 class="card-title text-center">登录你的账号</h5>
+                    <hr />
+                    <div class="alert alert-danger @responseMessageClass" role="alert" style="display: @responseMessageDisplay">
+                        @responseMessage
+                    </div>
+                    <form>
+                        <div class="form-floating mb-3">
+                            <input type="username" class="form-control" id="username" placeholder="name" @bind-value="@username">
+                            <label for="username">用户名</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input type="password" class="form-control" id="password" placeholder="Password" @bind-value="@password">
+                            <label for="password">密码</label>
+                        </div>
+                        <button type="button" class="btn btn-primary w-100" @onclick="HandleLogin">登录</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private string username;
+    private string password;
+    private string responseMessageDisplay = "none";
+    private string responseMessageClass;
+    private string responseMessage;
+
+    private async Task HandleLogin()
+    {
+        responseMessageDisplay = "none";
+
+        var result = await AuthManager.LoginAsync(username, password);
+        if (result.Code==0)
+        {
+            var successResult = (AuthManager.LoginSuccessResponse)result;
+            var token = successResult.Data.Token;
+            //save token
+            await jsRuntime.InvokeVoidAsync("sessionStorage.setItem", "token", token);
+            // 关闭进度条，提示
+            responseMessageDisplay = "block";
+            responseMessageClass = "success-info";
+            responseMessage =  "登录成功";
+
+            // 登录成功，执行相关操作
+            NavigationManager.NavigateTo("/userDetails");
+        }
+        else
+        {
+            // 登录失败，提示错误信息
+            responseMessageDisplay = "block";
+            responseMessageClass = "alert-danger";
+            responseMessage =  "登录失败："+result.Message;
+        }
+    }
+}
+
